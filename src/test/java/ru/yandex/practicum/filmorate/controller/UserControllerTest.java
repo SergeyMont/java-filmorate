@@ -19,12 +19,7 @@ class UserControllerTest {
             .birth(LocalDate.of(1900, 10, 10))
             .email("tret@mail.ru")
             .build();
-    User wrong = User.builder()
-            .id(-1).name("   ")
-            .login("")
-            .birth(LocalDate.of(3900, 10, 10))
-            .email("tret@ttt")
-            .build();
+
     List<User> list = new ArrayList<>();
 
     @Test
@@ -48,10 +43,4 @@ class UserControllerTest {
         assertEquals(list, controller.findAllUsers());
     }
 
-    @Test
-    void shouldThrowException() {
-        //final Exception exception= assertThrows(MethodArgumentNotValidException.class, () ->
-        // controller.create(wrong));
-        //не получилось добавить, т.к. валидация стартует в разрезе всего приложения
-    }
 }
