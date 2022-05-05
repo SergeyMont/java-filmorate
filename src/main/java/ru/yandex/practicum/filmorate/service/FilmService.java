@@ -17,18 +17,18 @@ public class FilmService {
         this.filmStorage=filmStorage;
     }
 
-    public void addLike(Long id){
-        filmStorage.findById(id).addLike(id);
+    public void addLike(Long id, Long userId){
+        filmStorage.findById(id).addLike(userId);
     }
 
-    public void removeLike(Long id){
-        filmStorage.findById(id).removeLike(id);
+    public void removeLike(Long id, Long userId){
+        filmStorage.findById(id).removeLike(userId);
     }
 
-    public List<Film> findTopFilms(){
+    public List<Film> findTopFilms(int count){
         return filmStorage.getAll().stream()
                 .sorted((f1,f2)->f1.getLikes().size()-f2.getLikes().size())
-                .limit(10)
+                .limit(count)
                 .collect(Collectors.toUnmodifiableList());
     }
 }
