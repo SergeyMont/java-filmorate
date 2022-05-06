@@ -8,8 +8,9 @@ public interface FilmStorage {
 
     List<Film> getAll();
 
-    void create(Film film);
+    Film create(Film film);
 
-    void update(Film film);
+    Film update(Film film);
+
     Film findById(Long id);
 }

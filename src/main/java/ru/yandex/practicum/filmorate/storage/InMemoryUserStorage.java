@@ -11,6 +11,7 @@ import java.util.Map;
 @Component
 public class InMemoryUserStorage implements UserStorage{
     private final Map<Long,User> map=new HashMap<>();
+    private  static Long storageId=1L;
     @Override
     public List<User> getAll() {
         List<User>list= new ArrayList<>();
@@ -19,17 +20,21 @@ public class InMemoryUserStorage implements UserStorage{
     }
 
     @Override
-    public void create(User user) {
-        map.put(user.getId(), user);
+    public User create(User user) {
+        user.setId(getNextId());
+        System.out.println(user.toString());
+        return map.put(user.getId(), user);
     }
 
     @Override
-    public void update(User user) {
-        map.put(user.getId(), user);
+    public User update(User user) {
+        return map.put(user.getId(), user);
     }
 
     @Override
     public User findById(Long id) {
         return map.getOrDefault(id,null);
     }
+
+    private static Long getNextId (){return storageId++;}
 }

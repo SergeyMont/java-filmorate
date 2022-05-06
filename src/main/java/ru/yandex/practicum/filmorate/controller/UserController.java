@@ -2,8 +2,10 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -30,43 +32,50 @@ public class UserController {
 
     @GetMapping("/users/{id}")
     public User findById(@PathVariable("id") Long id) {
+        if (id < 0) {
+            throw new ValidationException("id must be positive");
+        }
         return userStorage.findById(id);
     }
 
     @PostMapping("/users")
-    public void create(@Validated @RequestBody User user) {
+    public ResponseEntity<User> create(@Validated @RequestBody User user) {
         log.info("Получен запрос к эндпоинту: POST /users, Строка параметров запроса: '{}'",
                 user.toString());
         if (user.getName().isEmpty()) {
             user.setName(user.getLogin());
         }
         userStorage.create(user);
+        return ResponseEntity.ok(user);
     }
 
     @PutMapping("/users")
-    public void update(@Validated @RequestBody User user) {
+    public User update(@Validated @RequestBody User user) {
         log.info("Получен запрос к эндпоинту: PUT /users, Строка параметров запроса: '{}'",
                 user.toString());
-        userStorage.update(user);
+        return userStorage.update(user);
     }
 
     @PutMapping("/users/{id}/friends/{friendId}")
     public void addToFriends(@PathVariable Long id, @PathVariable Long friendId) {
-        userService.addToFriend(id,friendId);
+        if (id < 0 || friendId < 0) {
+            throw new ValidationException("id must be positive");
+        }
+        userService.addToFriend(id, friendId);
     }
 
     @DeleteMapping("/users/{id}/friends/{friendId}")
-    public void deleteFriend(@PathVariable Long id, @PathVariable Long friendId){
-        userService.removeFromFriends(id,friendId);
+    public void deleteFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        userService.removeFromFriends(id, friendId);
     }
 
     @GetMapping("/users/{id}/friends")
-    public Set<User> allFriends(@PathVariable Long id){
+    public Set<User> allFriends(@PathVariable Long id) {
         return userService.allFriends(id);
     }
 
     @GetMapping("/users/{id}/friends/common/{otherId}")
-    public Set<User> findOurFriends(@PathVariable Long id, @PathVariable Long otherId){
-        return userService.findOurFriends(id,otherId);
+    public Set<User> findOurFriends(@PathVariable Long id, @PathVariable Long otherId) {
+        return userService.findOurFriends(id, otherId);
     }
 }

@@ -5,6 +5,7 @@ import lombok.Data;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -20,10 +21,11 @@ public class User {
     private String login;
     private String name;
     @Past(message = "You can't birth in future")
-    private LocalDate birth;
+    private LocalDate birthday;
     private Set<Long> friends;
 
     public void addFriend(Long id){
+        friends=new HashSet<>();
         friends.add(id);
     }
 

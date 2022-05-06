@@ -21,7 +21,7 @@ class UserControllerTest {
     User right = User.builder()
             .id(0).name("eree")
             .login("trdvbh")
-            .birth(LocalDate.of(1900, 10, 10))
+            .birthday(LocalDate.of(1900, 10, 10))
             .email("tret@mail.ru")
             .build();
 
