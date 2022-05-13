@@ -53,7 +53,8 @@ public class UserController {
     public User update(@Validated @RequestBody User user) {
         log.info("Получен запрос к эндпоинту: PUT /users, Строка параметров запроса: '{}'",
                 user.toString());
-        return userStorage.update(user);
+        userStorage.update(user);
+        return user;
     }
 
     @PutMapping("/users/{id}/friends/{friendId}")
