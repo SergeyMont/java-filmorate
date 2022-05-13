@@ -24,12 +24,12 @@ public class User {
     private LocalDate birthday;
     private Set<Long> friends;
 
-    public void addFriend(Long id){
-        friends=new HashSet<>();
+    public void addFriend(Long id) {
+        friends = new HashSet<>();
         friends.add(id);
     }
 
-    public void removeFriend(Long id){
+    public void removeFriend(Long id) {
         friends.remove(id);
     }
 }

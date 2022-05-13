@@ -11,11 +11,11 @@ import java.util.Map;
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Long, Film> map = new HashMap<>();
-    private static Long storageId=1L;
+    private static Long storageId = 1L;
 
     @Override
     public List<Film> getAll() {
-        List<Film>list=new ArrayList<>();
+        List<Film> list = new ArrayList<>();
         list.addAll(map.values());
         return list;
     }
@@ -36,5 +36,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         return map.get(id);
     }
 
-    private static Long getNextId(){return storageId++;}
+    private static Long getNextId() {
+        return storageId++;
+    }
 }

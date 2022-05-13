@@ -9,12 +9,13 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class InMemoryUserStorage implements UserStorage{
-    private final Map<Long,User> map=new HashMap<>();
-    private  static Long storageId=1L;
+public class InMemoryUserStorage implements UserStorage {
+    private final Map<Long, User> map = new HashMap<>();
+    private static Long storageId = 1L;
+
     @Override
     public List<User> getAll() {
-        List<User>list= new ArrayList<>();
+        List<User> list = new ArrayList<>();
         list.addAll(map.values());
         return list;
     }
@@ -33,8 +34,10 @@ public class InMemoryUserStorage implements UserStorage{
 
     @Override
     public User findById(Long id) {
-        return map.getOrDefault(id,null);
+        return map.getOrDefault(id, null);
     }
 
-    private static Long getNextId (){return storageId++;}
+    private static Long getNextId() {
+        return storageId++;
+    }
 }

@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
-@RequiredArgsConstructor
 public class Film {
     @PositiveOrZero(message = "ID can't be negative")
     private long id;
@@ -21,12 +20,27 @@ public class Film {
     private String description;
     @PastOrPresent(message = "Realise should be in past or in present")
     private LocalDate releaseDate;
+
     @JsonSerialize(using = CustomTimeSerializer.class)
     private Duration duration;
-    @NonNull
-    private Set<Long> likes=new HashSet<>();
 
+    private Set<Long> likes;
 
+    public Film() {
+        likes = new HashSet<>();
+    }
+
+    public Film(@PositiveOrZero(message = "ID can't be negative") long id, @NotEmpty(message =
+            "Name can't be empty") String name, @NotBlank @Size(max = 200, message = "Description" +
+            " should be shorter") String description, @PastOrPresent(message = "Realise should be" +
+            " in past or in present") LocalDate releaseDate, Duration duration) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        likes = new HashSet<>();
+    }
 
     public void addLike(Long id) {
         likes.add(id);

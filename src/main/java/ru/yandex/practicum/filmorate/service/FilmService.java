@@ -14,21 +14,21 @@ public class FilmService {
     private final FilmStorage filmStorage;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage){
-        this.filmStorage=filmStorage;
+    public FilmService(FilmStorage filmStorage) {
+        this.filmStorage = filmStorage;
     }
 
-    public void addLike(Long id, Long userId){
+    public void addLike(Long id, Long userId) {
         filmStorage.findById(id).addLike(userId);
     }
 
-    public void removeLike(Long id, Long userId){
+    public void removeLike(Long id, Long userId) {
         filmStorage.findById(id).removeLike(userId);
     }
 
-    public List<Film> findTopFilms(int count){
+    public List<Film> findTopFilms(int count) {
         return filmStorage.getAll().stream()
-                .sorted(Comparator.comparingInt(f -> -1*f.getLikes().size()))
+                .sorted(Comparator.comparingInt(f -> -1 * f.getLikes().size()))
                 .limit(count)
                 .collect(Collectors.toUnmodifiableList());
     }

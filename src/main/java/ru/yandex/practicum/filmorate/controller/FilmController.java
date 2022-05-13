@@ -12,16 +12,14 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @Slf4j
 public class FilmController {
     private final FilmService filmService;
     private final FilmStorage filmStorage;
+    private static final LocalDate ERAFILM = LocalDate.of(1895, 12, 28);
 
     @Autowired
     public FilmController(FilmService filmService, FilmStorage filmStorage) {
@@ -36,7 +34,7 @@ public class FilmController {
     }
 
     @GetMapping("/films/{id}")
-    public Film findFilmById(@PathVariable Long id){
+    public Film findFilmById(@PathVariable Long id) {
         if (id < 0) {
             throw new ValidationException("id must be positive");
         }
@@ -62,7 +60,7 @@ public class FilmController {
     }
 
     private void validateFilm(Film film) {
-        if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+        if (film.getReleaseDate().isBefore(ERAFILM)) {
             throw new FilmDateValidationException("Era of films starts 28Dec1895 ");
         }
         if (film.getDuration().isNegative()) {
@@ -71,23 +69,24 @@ public class FilmController {
     }
 
     @PutMapping("/films/{id}/like/{userId}")
-    public void addLike(@PathVariable Long id, @PathVariable Long userId){
+    public void addLike(@PathVariable Long id, @PathVariable Long userId) {
         if (id < 0 || userId < 0) {
             throw new ValidationException("id must be positive");
         }
-        filmService.addLike(id,userId);
+        filmService.addLike(id, userId);
     }
 
     @DeleteMapping("/films/{id}/like/{userId}")
-    public  void deleteLike(@PathVariable Long id, @PathVariable Long userId){
+    public void deleteLike(@PathVariable Long id, @PathVariable Long userId) {
         if (id < 0 || userId < 0) {
             throw new ValidationException("id must be positive");
         }
-        filmService.removeLike(id,userId);
+        filmService.removeLike(id, userId);
     }
 
     @GetMapping("/films/popular")
-    public  List<Film> findTopFilms(@RequestParam(value = "count",defaultValue = "10",required = false) int count){
+    public List<Film> findTopFilms(@RequestParam(value = "count", defaultValue = "10", required =
+            false) int count) {
         return filmService.findTopFilms(count);
     }
 

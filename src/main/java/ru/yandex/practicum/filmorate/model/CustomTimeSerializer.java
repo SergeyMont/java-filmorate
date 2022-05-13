@@ -8,15 +8,17 @@ import java.io.IOException;
 import java.time.Duration;
 
 public class CustomTimeSerializer extends StdSerializer<Duration> {
-    public CustomTimeSerializer(){
+    public CustomTimeSerializer() {
         this(null);
     }
+
     public CustomTimeSerializer(Class<Duration> t) {
         super(t);
     }
 
     @Override
-    public void serialize(Duration duration, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+    public void serialize(Duration duration, JsonGenerator jsonGenerator,
+                          SerializerProvider serializerProvider) throws IOException {
         jsonGenerator.writeNumber(duration.toSeconds());
     }
 }

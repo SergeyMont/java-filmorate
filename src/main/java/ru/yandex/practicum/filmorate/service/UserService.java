@@ -30,8 +30,8 @@ public class UserService {
     }
 
     public Set<User> allFriends(Long id) {
-        Set<User>set=new HashSet<>();
-        List<Long> list=new ArrayList<>();
+        Set<User> set = new HashSet<>();
+        List<Long> list = new ArrayList<>();
         list.addAll(userStorage.findById(id).getFriends());
         for (int i = 0; i < list.size(); i++) {
             set.add(userStorage.findById(list.get(i)));
@@ -40,9 +40,9 @@ public class UserService {
     }
 
     public Set<User> findOurFriends(Long id, Long idFriend) {
-        Set<User>set=new HashSet<>();
-        Set<Long>setNumber=new HashSet<>();
-        List<Long> list=new ArrayList<>();
+        Set<User> set = new HashSet<>();
+        Set<Long> setNumber = new HashSet<>();
+        List<Long> list = new ArrayList<>();
         setNumber.addAll(userStorage.findById(id).getFriends());
         setNumber.addAll(userStorage.findById(idFriend).getFriends());
         list.addAll(setNumber);
