@@ -4,6 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -12,11 +15,13 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserControllerTest {
-    UserController controller = new UserController();
+    UserStorage storage = new InMemoryUserStorage();
+    UserService userService = new UserService(storage);
+    UserController controller = new UserController(userService, storage);
     User right = User.builder()
             .id(0).name("eree")
             .login("trdvbh")
-            .birth(LocalDate.of(1900, 10, 10))
+            .birthday(LocalDate.of(1900, 10, 10))
             .email("tret@mail.ru")
             .build();
 
