@@ -5,7 +5,9 @@ import lombok.Data;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Data
@@ -23,13 +25,18 @@ public class User {
     @Past(message = "You can't birth in future")
     private LocalDate birthday;
     private Set<Long> friends;
+    private Map<Long, Boolean> friendship;
 
     public void addFriend(Long id) {
         friends = new HashSet<>();
+        friendship = new HashMap<>();
         friends.add(id);
+        friendship.put(id, false);
     }
 
     public void removeFriend(Long id) {
+
         friends.remove(id);
+        friendship.remove(id);
     }
 }
