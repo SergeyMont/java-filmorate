@@ -1,14 +1,16 @@
 # java-filmorate
 Template repository for Filmorate project.
 ![This is ER-diagtam](https://github.com/SergeyMont/java-filmorate/blob/add-friends-likes/filmorate.png)
+
+        
 CREATE TABLE film
 (
-  film_id      INT       NOT NULL AUTO_INCREMENT,
-  name         VARCHAR   NULL    ,
-  description  VARCHAR   NULL    ,
-  release_date DATE      NULL    ,
-  duration     TIMESTAMP NULL    ,
-  rating_id    INT       NOT NULL,
+  film_id      INT          NOT NULL AUTO_INCREMENT,
+  name         VARCHAR      NULL    ,
+  description  VARCHAR(200) NULL    ,
+  release_date DATE         NULL    ,
+  duration     TIMESTAMP    NULL    ,
+  rating_id    INT          NOT NULL,
   PRIMARY KEY (film_id)
 );
 
