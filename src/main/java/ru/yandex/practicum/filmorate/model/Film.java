@@ -18,6 +18,8 @@ public class Film {
     @NotBlank
     @Size(max = 200, message = "Description should be shorter")
     private String description;
+    private Genre genre;
+    private Rating rating;
     @PastOrPresent(message = "Realise should be in past or in present")
     private LocalDate releaseDate;
 
