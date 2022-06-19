@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.FilmDateValidationException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.FilmDaoStorage;
 
@@ -14,7 +15,10 @@ import ru.yandex.practicum.filmorate.storage.FilmDaoStorage;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @Slf4j
@@ -60,8 +64,13 @@ public class FilmController {
             throw new ValidationException("id must be positive");
         }
         validateFilm(film);
-        film = filmService.updateFilm(film);
-        return film;
+        Film result = filmService.updateFilm(film);
+        if (result.getGenres() != null) {
+            result.setGenres(result.getGenres().stream().sorted(Comparator.comparing(Genre::getId)).collect(Collectors.toCollection(LinkedHashSet::new)));
+            return result;
+        } else {
+            return film;
+        }
     }
 
     @PutMapping("/films/{id}/like/{userId}")

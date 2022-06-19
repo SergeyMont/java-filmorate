@@ -132,7 +132,7 @@ public class FilmDaoImpl implements FilmDaoStorage, LikeStorage {
         list = jdbcTemplate.query(sql, (rs, getNum) -> Genre.builder().id(rs.getInt("genre_id"))
                 .name(rs.getString("name")).build(), id);
         genreSet.addAll(list);
-        return genreSet.stream().sorted(Comparator.comparing(Genre::getId)).collect(Collectors.toSet());
+        return genreSet.stream().sorted(Comparator.comparing(Genre::getId)).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     private Film mapRowToFilm(ResultSet rs, Set<Genre> genres) throws SQLException {

@@ -13,7 +13,7 @@ import java.util.Set;
 @Data
 @Builder
 public class Film {
-    private long id;
+    private Long id;
     @NotEmpty(message = "Name can't be empty")
     private String name;
     @NotBlank
