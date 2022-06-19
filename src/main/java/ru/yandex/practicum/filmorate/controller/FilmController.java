@@ -8,29 +8,30 @@ import ru.yandex.practicum.filmorate.exception.FilmDateValidationException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.FilmDaoStorage;
 
 
+import java.sql.Date;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 
 @RestController
 @Slf4j
 public class FilmController {
     private final FilmService filmService;
-    private final FilmStorage filmStorage;
-    private static final LocalDate ERAFILM = LocalDate.of(1895, 12, 28);
+
+    private static final Date ERAFILM = Date.valueOf(LocalDate.of(1895, 12, 28));
 
     @Autowired
-    public FilmController(FilmService filmService, FilmStorage filmStorage) {
+    public FilmController(FilmService filmService) {
         this.filmService = filmService;
-        this.filmStorage = filmStorage;
     }
 
     @GetMapping("/films")
     public List<Film> findAllFilms() {
         log.info("Получен запрос к эндпоинту: GET /films");
-        return filmStorage.getAll();
+        return filmService.findAll();
     }
 
     @GetMapping("/films/{id}")
@@ -38,7 +39,8 @@ public class FilmController {
         if (id < 0) {
             throw new ValidationException("id must be positive");
         }
-        return filmStorage.findById(id);
+        Film film = filmService.findById(id);
+        return film;
     }
 
     @PostMapping("/films")
@@ -46,7 +48,7 @@ public class FilmController {
         log.info("Получен запрос к эндпоинту: POST /films, Строка параметров запроса: '{}'",
                 film.toString());
         validateFilm(film);
-        filmStorage.create(film);
+        film = filmService.createFilm(film);
         return film;
     }
 
@@ -54,18 +56,12 @@ public class FilmController {
     public Film update(@Validated @RequestBody Film film) {
         log.info("Получен запрос к эндпоинту: PUT /films, Строка параметров запроса: '{}'",
                 film.toString());
+        if (film.getId() < 0) {
+            throw new ValidationException("id must be positive");
+        }
         validateFilm(film);
-        filmStorage.update(film);
+        film = filmService.updateFilm(film);
         return film;
-    }
-
-    private void validateFilm(Film film) {
-        if (film.getReleaseDate().isBefore(ERAFILM)) {
-            throw new FilmDateValidationException("Era of films starts 28Dec1895 ");
-        }
-        if (film.getDuration().isNegative()) {
-            throw new FilmDateValidationException("Duration of film can't be negative");
-        }
     }
 
     @PutMapping("/films/{id}/like/{userId}")
@@ -85,9 +81,18 @@ public class FilmController {
     }
 
     @GetMapping("/films/popular")
-    public List<Film> findTopFilms(@RequestParam(value = "count", defaultValue = "10", required =
+    public Collection<Film> findTopFilms(@RequestParam(value = "count", defaultValue = "10", required =
             false) int count) {
         return filmService.findTopFilms(count);
+    }
+
+    private void validateFilm(Film film) {
+        if (film.getReleaseDate().before(ERAFILM)) {
+            throw new FilmDateValidationException("Era of films starts 28Dec1895 ");
+        }
+        if (film.getDuration() < 0) {
+            throw new FilmDateValidationException("Duration of film can't be negative");
+        }
     }
 
 }

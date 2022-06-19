@@ -5,7 +5,7 @@ import lombok.Value;
 
 @Value
 @Builder
-public class Genre {
-    int id;
-    String name;
+public class Like {
+    Long filmId;
+    Long userId;
 }
