@@ -13,6 +13,8 @@ import java.util.List;
 @Component
 public class GenreDaoImpl implements GenreStorage {
     private final JdbcTemplate jdbcTemplate;
+    private static final String GET_ALL_GENRE = "SELECT * FROM genres";
+    private static final String GET_GENRE_BY_ID = "SELECT * FROM genres WHERE genre_id = ?";
 
     @Autowired
     public GenreDaoImpl(JdbcTemplate jdbcTemplate) {
@@ -21,14 +23,12 @@ public class GenreDaoImpl implements GenreStorage {
 
     @Override
     public List<Genre> getAllGenre() {
-        String query = "SELECT * FROM genres";
-        return jdbcTemplate.query(query, (rs, rowNum) -> mapRowToMpa(rs));
+        return jdbcTemplate.query(GET_ALL_GENRE, (rs, rowNum) -> mapRowToMpa(rs));
     }
 
     @Override
     public Genre getGenreById(Integer id) {
-        String query = "SELECT * FROM genres WHERE genre_id = ?";
-        final List<Genre> genres = jdbcTemplate.query(query, (rs, rowNum) -> mapRowToMpa(rs), id);
+        final List<Genre> genres = jdbcTemplate.query(GET_GENRE_BY_ID, (rs, rowNum) -> mapRowToMpa(rs), id);
         if (genres.size() > 0) {
             return genres.get(0);
         } else {

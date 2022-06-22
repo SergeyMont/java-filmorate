@@ -13,6 +13,8 @@ import java.util.List;
 @Component
 public class MpaDaoImpl implements MpaStorage {
     private final JdbcTemplate jdbcTemplate;
+    private static final String GET_ALL_MPA = "SELECT * FROM mpa";
+    private static final String GET_MPA_BY_ID = "SELECT * FROM mpa WHERE mpa_id = ?";
 
     @Autowired
     public MpaDaoImpl(JdbcTemplate jdbcTemplate) {
@@ -21,14 +23,12 @@ public class MpaDaoImpl implements MpaStorage {
 
     @Override
     public List<MpaRating> getAllMpa() {
-        String query = "SELECT * FROM mpa";
-        return jdbcTemplate.query(query, (rs, rowNum) -> mapRowToMpa(rs));
+        return jdbcTemplate.query(GET_ALL_MPA, (rs, rowNum) -> mapRowToMpa(rs));
     }
 
     @Override
     public MpaRating getMpaById(Integer id) {
-        String query = "SELECT * FROM mpa WHERE mpa_id = ?";
-        final List<MpaRating> mpaRatings = jdbcTemplate.query(query, (rs, rowNum) -> mapRowToMpa(rs), id);
+        final List<MpaRating> mpaRatings = jdbcTemplate.query(GET_MPA_BY_ID, (rs, rowNum) -> mapRowToMpa(rs), id);
         if (mpaRatings.size() > 0) {
             return mpaRatings.get(0);
         } else {

@@ -17,6 +17,10 @@ import java.util.List;
 public class UserDaoImpl implements UserDaoStorage {
 
     private final JdbcTemplate jdbcTemplate;
+    private static final String GET_ALL_USERS = "SELECT user_id, email, login, name, birthday FROM users";
+    private static final String INSERT_USER = "INSERT INTO users(email, login, name, birthday) VALUES(?, ?, ?, ?)";
+    private static final String UPDATE_USER = "update users set email=?, login=?, name=?, birthday=? where user_id=?";
+    private static final String SELECT_USER_BY_ID = "select user_id, email, login, name, birthday from users where user_id=?";
 
     @Autowired
     public UserDaoImpl(JdbcTemplate jdbcTemplate) {
@@ -25,16 +29,14 @@ public class UserDaoImpl implements UserDaoStorage {
 
     @Override
     public List<User> getAll() {
-        String query = "select user_id, email, login, name, birthday from users";
-        return jdbcTemplate.query(query, this::mapRowToUser);
+        return jdbcTemplate.query(GET_ALL_USERS, this::mapRowToUser);
     }
 
     @Override
     public User create(User user) {
-        String query = "insert into users(email, login, name, birthday) values(?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
-            PreparedStatement stmt = connection.prepareStatement(query, new String[]{"user_id"});
+            PreparedStatement stmt = connection.prepareStatement(INSERT_USER, new String[]{"user_id"});
             stmt.setString(1, user.getEmail());
             stmt.setString(2, user.getLogin());
             stmt.setString(3, user.getName());
@@ -47,8 +49,7 @@ public class UserDaoImpl implements UserDaoStorage {
 
     @Override
     public User update(User user) {
-        String query = "update users set email=?, login=?, name=?, birthday=? where user_id=?";
-        int up = jdbcTemplate.update(query,
+        int up = jdbcTemplate.update(UPDATE_USER,
                 user.getEmail(),
                 user.getLogin(),
                 user.getName(),
@@ -60,8 +61,7 @@ public class UserDaoImpl implements UserDaoStorage {
 
     @Override
     public User findById(Long id) {
-        String query = "select user_id, email, login, name, birthday from users where user_id=?";
-        return jdbcTemplate.queryForObject(query, this::mapRowToUser, id);
+        return jdbcTemplate.queryForObject(SELECT_USER_BY_ID, this::mapRowToUser, id);
     }
 
     private User mapRowToUser(ResultSet resultSet, int rowNum) throws SQLException {

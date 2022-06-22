@@ -15,6 +15,14 @@ import java.util.Set;
 @Repository
 public class FriendDaoImpl implements FriendDaoStorage {
     private final JdbcTemplate jdbcTemplate;
+    private static final String GET_REQUESTS = "SELECT user_id, email, login, name, birthday FROM users AS u"
+            + " JOIN friend_request AS r ON u.user_id=r.second_user_id WHERE first_user_id=?";
+    private static final String INSERT_REQUEST = "INSERT INTO friend_request(first_user_id, second_user_id) VALUES(?,?)";
+    private static final String DELETE_REQUEST = "DELETE FROM friend_request WHERE first_user_id=? AND second_user_id=?";
+    private static final String GET_FRIENDSHIP = "SELECT user_id, email, login, name, birthday FROM users AS u"
+            + " JOIN friend_accepted AS r ON u.user_id=r.second_user_id WHERE first_user_id=?";
+    private static final String INSERT_FRIENDSHIP = "INSERT INTO friend_accepted(first_user_id, second_user_id) VALUES (?,?)";
+    private static final String DELETE_FRIENDSHIP = "DELETE FROM friend_accepted WHERE first_user_id=? AND second_user_id=?";
 
     @Autowired
     public FriendDaoImpl(JdbcTemplate jdbcTemplate) {
@@ -23,41 +31,36 @@ public class FriendDaoImpl implements FriendDaoStorage {
 
     @Override
     public Set<User> getRequests(Long id) {
-        String query = "select user_id, email, login, name, birthday from users as u join friend_request as r on u.user_id=r.second_user_id where first_user_id=?";
         Set<User> set = new HashSet<>();
-        List<User> list = jdbcTemplate.query(query, this::mapRowToUser, id);
+        List<User> list = jdbcTemplate.query(GET_REQUESTS, this::mapRowToUser, id);
         set.addAll(list);
         return set;
     }
 
     @Override
     public boolean addRequest(Long id, Long friendId) {
-        String query = "insert into friend_request(first_user_id, second_user_id) values(?,?)";
-        return jdbcTemplate.update(query, id, friendId) > 0;
+        return jdbcTemplate.update(INSERT_REQUEST, id, friendId) > 0;
     }
 
     @Override
     public boolean removeRequest(Long id, Long friendId) {
-        String query = "delete from friend_request where first_user_id=? and second_user_id=?";
-        return jdbcTemplate.update(query, id, friendId) > 0;
+
+        return jdbcTemplate.update(DELETE_REQUEST, id, friendId) > 0;
     }
 
     @Override
     public Set<User> getFriends(Long id) {
-        String query = "select user_id, email, login, name, birthday from users as u join friend_accepted as r on u.user_id=r.second_user_id where first_user_id=?";
-        return (Set<User>) jdbcTemplate.query(query, this::mapRowToUser, id);
+        return (Set<User>) jdbcTemplate.query(GET_FRIENDSHIP, this::mapRowToUser, id);
     }
 
     @Override
     public boolean addFriendship(Long id, Long friendId) {
-        String query = "insert into friend_accepted(first_user_id, second_user_id) values(?,?)";
-        return jdbcTemplate.update(query, id, friendId) > 0;
+        return jdbcTemplate.update(INSERT_FRIENDSHIP, id, friendId) > 0;
     }
 
     @Override
     public boolean removeFriendship(Long id, Long friendId) {
-        String query = "delete from friend_accepted where first_user_id=? and second_user_id=?";
-        return jdbcTemplate.update(query) > 0;
+        return jdbcTemplate.update(DELETE_FRIENDSHIP) > 0;
     }
 
     private User mapRowToUser(ResultSet resultSet, int rowNum) throws SQLException {

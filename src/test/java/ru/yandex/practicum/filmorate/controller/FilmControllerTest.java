@@ -73,6 +73,7 @@ class FilmControllerTest {
 
     @Test
     void updateWrong() {
+        wrong.setId(2L);
         wrong.setDuration(-15L);
         wrong.setReleaseDate(Date.valueOf(LocalDate.of(1999, 10, 1)));
         final Exception exception = assertThrows(FilmDateValidationException.class,

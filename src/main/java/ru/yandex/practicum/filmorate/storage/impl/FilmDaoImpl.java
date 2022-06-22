@@ -13,7 +13,6 @@ import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.storage.FilmDaoStorage;
 import ru.yandex.practicum.filmorate.storage.LikeStorage;
 
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -24,6 +23,22 @@ import java.util.stream.Collectors;
 public class FilmDaoImpl implements FilmDaoStorage, LikeStorage {
 
     private final JdbcTemplate jdbcTemplate;
+    private static final String GET_ALL_FILMS = "SELECT * FROM film LEFT JOIN mpa ON film.mpa_id = mpa.mpa_id";
+    private static final String INSERT_FILM = "INSERT INTO film ( name, description, release_date, duration, mpa_id)"
+            + " VALUES (?, ?, ?, ?, ?)";
+    private static final String UPDATE_FILM = "UPDATE film SET name = ?, description = ?, release_date = ?, duration = ?, mpa_id = ?"
+            + " WHERE film_id = ?";
+    private static final String DELETE_GENRES = "DELETE FROM film_genres WHERE film_id = ?";
+    private static final String SAVE_GENRES = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
+    private static final String GET_FILM_BY_ID = "SELECT * FROM film LEFT JOIN mpa ON film.mpa_id = mpa.mpa_id WHERE film_id = ?";
+    private static final String GET_POPULAR_FILMS = "SELECT * FROM film f LEFT JOIN (SELECT film_id, COUNT(*) likes_count FROM likes"
+            + " GROUP BY film_id) l ON f.film_id = l.film_id LEFT JOIN mpa ON f.mpa_id = mpa.mpa_id"
+            + " ORDER BY l.likes_count DESC LIMIT ?";
+    private static final String INSERT_LIKE = "INSERT INTO likes (user_id, film_id) VALUES (?, ?)";
+    private static final String DELETE_LIKE = "DELETE FROM likes WHERE user_id = ? AND film_id = ?";
+    private static final String GET_FILM_GENRES_BY_ID = "SELECT * FROM film_genres JOIN genres ON genres.genre_id = film_genres.genre_id"
+            + " WHERE film_id = ?";
+    private static final String GET_ALL_FILM_GENRES = "SELECT * FROM film_genres JOIN genres ON genres.genre_id = film_genres.genre_id";
 
     @Autowired
     public FilmDaoImpl(JdbcTemplate jdbcTemplate) {
@@ -33,8 +48,7 @@ public class FilmDaoImpl implements FilmDaoStorage, LikeStorage {
     @Override
     public List<Film> getAll() {
         final Map<Long, Set<Genre>> filmsGenres = getAllFilmsGenres();
-        final String query = "SELECT * FROM film LEFT JOIN mpa ON film.mpa_id = mpa.mpa_id";
-        return jdbcTemplate.query(query, (rs, numRow) -> {
+        return jdbcTemplate.query(GET_ALL_FILMS, (rs, numRow) -> {
             final Long filmId = rs.getLong("film_id");
             return mapRowToFilm(rs, filmsGenres.get(filmId));
         });
@@ -42,11 +56,9 @@ public class FilmDaoImpl implements FilmDaoStorage, LikeStorage {
 
     @Override
     public Film create(Film film) {
-        final String query = "INSERT INTO film ( name, description, release_date, duration, mpa_id)"
-                + " VALUES (?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         int good = jdbcTemplate.update(connection -> {
-            PreparedStatement stmt = connection.prepareStatement(query, new String[]{"film_id"});
+            PreparedStatement stmt = connection.prepareStatement(INSERT_FILM, new String[]{"film_id"});
             stmt.setString(1, film.getName());
             stmt.setString(2, film.getDescription());
             stmt.setDate(3, film.getReleaseDate());
@@ -55,7 +67,6 @@ public class FilmDaoImpl implements FilmDaoStorage, LikeStorage {
             return stmt;
         }, keyHolder);
         film.setId(keyHolder.getKey().longValue());
-
         updateGenres(film);
         if (good > 0) return film;
         return null;
@@ -63,15 +74,10 @@ public class FilmDaoImpl implements FilmDaoStorage, LikeStorage {
 
     @Override
     public Film update(Film film) {
-        final String sql = "UPDATE film SET name = ?, description = ?, release_date = ?, duration = ?, mpa_id = ?"
-                + " WHERE film_id = ?";
 
-        int good = jdbcTemplate.update(sql, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(),
+        int good = jdbcTemplate.update(UPDATE_FILM, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(),
                 film.getMpa().getId(), film.getId());
-
-        final String deleteGenres = "DELETE FROM film_genres WHERE film_id = ?";
-        jdbcTemplate.update(deleteGenres, film.getId());
-
+        jdbcTemplate.update(DELETE_GENRES, film.getId());
         updateGenres(film);
         if (good > 0) return film;
         return null;
@@ -79,17 +85,14 @@ public class FilmDaoImpl implements FilmDaoStorage, LikeStorage {
 
     private void updateGenres(Film film) {
         final Set<Genre> filmGenres = film.getGenres();
-
         if (filmGenres != null) {
-            final String genreSaveSql = "INSERT INTO film_genres (film_id, genre_id) VALUES (?, ?)";
-            filmGenres.forEach(x -> jdbcTemplate.update(genreSaveSql, film.getId(), x.getId()));
+            filmGenres.forEach(x -> jdbcTemplate.update(SAVE_GENRES, film.getId(), x.getId()));
         }
     }
 
     @Override
     public Film findById(Long id) {
-        final String query = "SELECT * FROM film LEFT JOIN mpa ON film.mpa_id = mpa.mpa_id WHERE film_id = ?";
-        List<Film> films = jdbcTemplate.query(query, (rs, numRow) -> mapRowToFilm(rs, getFilmGenresById(id)), id);
+        List<Film> films = jdbcTemplate.query(GET_FILM_BY_ID, (rs, numRow) -> mapRowToFilm(rs, getFilmGenresById(id)), id);
         if (films.size() > 0) {
             return films.get(0);
         } else {
@@ -99,13 +102,8 @@ public class FilmDaoImpl implements FilmDaoStorage, LikeStorage {
 
     @Override
     public Collection<Film> getPopularFilms(Integer limit) {
-        final String query = "SELECT * FROM film f LEFT JOIN (SELECT film_id, COUNT(*) likes_count FROM likes"
-                + " GROUP BY film_id) l ON f.film_id = l.film_id LEFT JOIN mpa ON f.mpa_id = mpa.mpa_id"
-                + " ORDER BY l.likes_count DESC LIMIT ?";
-
         final Map<Long, Set<Genre>> filmsGenres = getAllFilmsGenres();
-
-        return jdbcTemplate.query(query, (rs, numRow) -> {
+        return jdbcTemplate.query(GET_POPULAR_FILMS, (rs, numRow) -> {
             final Long filmId = rs.getLong("film_id");
             return mapRowToFilm(rs, filmsGenres.get(filmId));
         }, limit);
@@ -113,23 +111,18 @@ public class FilmDaoImpl implements FilmDaoStorage, LikeStorage {
 
     @Override
     public void save(Like like) {
-        final String query = "INSERT INTO likes (user_id, film_id) VALUES (?, ?)";
-        jdbcTemplate.update(query, like.getUserId(), like.getFilmId());
+        jdbcTemplate.update(INSERT_LIKE, like.getUserId(), like.getFilmId());
     }
 
     @Override
     public void delete(Like like) {
-        final String query = "DELETE FROM likes WHERE user_id = ? AND film_id = ?";
-        jdbcTemplate.update(query, like.getUserId(), like.getFilmId());
+        jdbcTemplate.update(DELETE_LIKE, like.getUserId(), like.getFilmId());
     }
 
     private Set<Genre> getFilmGenresById(Long id) {
-        final String sql = "SELECT * FROM film_genres JOIN genres ON genres.genre_id = film_genres.genre_id"
-                + " WHERE film_id = ?";
-
         Set<Genre> genreSet = new HashSet<>();
         List<Genre> list;
-        list = jdbcTemplate.query(sql, (rs, getNum) -> Genre.builder().id(rs.getInt("genre_id"))
+        list = jdbcTemplate.query(GET_FILM_GENRES_BY_ID, (rs, getNum) -> Genre.builder().id(rs.getInt("genre_id"))
                 .name(rs.getString("name")).build(), id);
         genreSet.addAll(list);
         return genreSet.stream().sorted(Comparator.comparing(Genre::getId)).collect(Collectors.toCollection(LinkedHashSet::new));
@@ -148,16 +141,12 @@ public class FilmDaoImpl implements FilmDaoStorage, LikeStorage {
     }
 
     private Map<Long, Set<Genre>> getAllFilmsGenres() {
-        final String sql = "SELECT * FROM film_genres JOIN genres ON genres.genre_id = film_genres.genre_id";
-
         final Map<Long, Set<Genre>> filmsGenres = new HashMap<>();
-
-        jdbcTemplate.query(sql, (RowCallbackHandler) rs -> {
+        jdbcTemplate.query(GET_ALL_FILM_GENRES, (RowCallbackHandler) rs -> {
             final Long filmId = rs.getLong("film_id");
             filmsGenres.getOrDefault(filmId, new HashSet<>()).add(Genre.builder().id(rs.getInt("genre_id"))
                     .name(rs.getString("name")).build());
         });
-
         return filmsGenres;
     }
 }

@@ -5,9 +5,6 @@ import lombok.*;
 
 import javax.validation.constraints.*;
 import java.sql.Date;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDate;
 import java.util.Set;
 
 @Data
@@ -25,6 +22,5 @@ public class Film {
     @PastOrPresent(message = "Realise should be in past or in present")
     private Date releaseDate;
 
-    //@JsonSerialize(using = CustomTimeSerializer.class)
     private Long duration;
 }
