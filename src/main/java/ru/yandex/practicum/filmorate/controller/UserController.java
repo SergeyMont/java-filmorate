@@ -2,24 +2,31 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserFriendService;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.service.UserServiceInterface;
+import ru.yandex.practicum.filmorate.storage.UserDaoStorage;
 
 import java.util.*;
 
 @RestController
 @Slf4j
 public class UserController {
-    private final UserService userService;
-    private final UserStorage userStorage;
+    private UserServiceInterface userService;
+    private final UserDaoStorage userStorage;
+
+    public UserController(UserDaoStorage userStorage) {
+        this.userStorage = userStorage;
+    }
 
     @Autowired
-    public UserController(UserService userService, UserStorage userStorage) {
+    public UserController(@Qualifier("userFriendService") UserServiceInterface userService, @Qualifier("userDaoImpl") UserDaoStorage userStorage) {
         this.userService = userService;
         this.userStorage = userStorage;
     }
@@ -53,6 +60,9 @@ public class UserController {
     public User update(@Validated @RequestBody User user) {
         log.info("Получен запрос к эндпоинту: PUT /users, Строка параметров запроса: '{}'",
                 user.toString());
+        if (user.getId() < 0) {
+            throw new ValidationException("id must be positive");
+        }
         userStorage.update(user);
         return user;
     }

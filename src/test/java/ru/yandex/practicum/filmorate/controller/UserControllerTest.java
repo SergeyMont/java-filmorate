@@ -1,27 +1,29 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SpringBootTest
+@AutoConfigureTestDatabase
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class UserControllerTest {
-    UserStorage storage = new InMemoryUserStorage();
-    UserService userService = new UserService(storage);
-    UserController controller = new UserController(userService, storage);
+    @Autowired
+    private UserController controller;
     User right = User.builder()
             .id(0).name("eree")
             .login("trdvbh")
-            .birthday(LocalDate.of(1900, 10, 10))
+            .birthday(Date.valueOf(LocalDate.of(1900, 10, 10)))
             .email("tret@mail.ru")
             .build();
 

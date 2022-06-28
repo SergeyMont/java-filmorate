@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import javax.validation.constraints.*;
-import java.time.LocalDate;
+import java.sql.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -13,7 +13,7 @@ import java.util.Set;
 @Data
 @Builder
 public class User {
-    @PositiveOrZero(message = "ID can't be negative")
+
     private long id;
     @NotEmpty(message = "Email can't be empty")
     @Email(message = "Enter correct email format")
@@ -23,7 +23,7 @@ public class User {
     private String login;
     private String name;
     @Past(message = "You can't birth in future")
-    private LocalDate birthday;
+    private Date birthday;
     private Set<Long> friends;
     private Map<Long, Boolean> friendship;
 
