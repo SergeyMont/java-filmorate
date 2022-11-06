@@ -1,6 +1,9 @@
 # java-filmorate
-Template repository for Filmorate project.
-![This is ER-diagtam](https://github.com/SergeyMont/java-filmorate/blob/add-friends-likes/filmorate.png)
+It is Filmorate project looks like Kinopoisk.
+Users can leave feedback about films, it's affects the rating of films.
+
+Next I show ER-diagram of DB
+![This is ER-diagram](https://github.com/SergeyMont/java-filmorate/blob/add-friends-likes/filmorate.png)
 
         
 CREATE TABLE film
